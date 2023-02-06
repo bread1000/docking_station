@@ -1,6 +1,7 @@
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/hal/Types.hpp:114:5:touchgfx::colortype::colortype(uint32_t)	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/hal/Types.hpp:173:5:touchgfx::Rect::Rect()	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/hal/Types.hpp:193:5:touchgfx::Rect::Rect(int16_t, int16_t, int16_t, int16_t)	24	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/Bitmap.hpp:168:14:touchgfx::Bitmap::Bitmap(touchgfx::BitmapId)	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:59:5:touchgfx::Drawable::Drawable()	24	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:75:13:touchgfx::Drawable::~Drawable()	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:75:13:virtual touchgfx::Drawable::~Drawable()	16	static
@@ -44,13 +45,20 @@
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/TextArea.hpp:56:5:touchgfx::TextArea::TextArea()	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/TextArea.hpp:84:17:void touchgfx::TextArea::setColor(touchgfx::colortype)	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/TextArea.hpp:177:17:void touchgfx::TextArea::setLinespacing(int16_t)	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/AbstractButton.hpp:35:7:touchgfx::AbstractButton::~AbstractButton()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/AbstractButton.hpp:35:7:virtual touchgfx::AbstractButton::~AbstractButton()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Button.hpp:53:13:touchgfx::Button::~Button()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Button.hpp:53:13:virtual touchgfx::Button::~Button()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/ToggleButton.hpp:61:18:virtual void touchgfx::ToggleButton::setBitmaps(const touchgfx::Bitmap&, const touchgfx::Bitmap&)	24	static
 ../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:39:7:touchgfx::View<Screen1Presenter>::~View()	16	static
 ../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:39:7:virtual touchgfx::View<Screen1Presenter>::~View()	16	static
-../TouchGFX/generated/gui_generated/include/gui_generated/screen1_screen/Screen1ViewBase.hpp:17:13:Screen1ViewBase::~Screen1ViewBase()	16	static
-../TouchGFX/generated/gui_generated/include/gui_generated/screen1_screen/Screen1ViewBase.hpp:17:13:virtual Screen1ViewBase::~Screen1ViewBase()	16	static
+../TouchGFX/generated/gui_generated/include/gui_generated/screen1_screen/Screen1ViewBase.hpp:18:13:Screen1ViewBase::~Screen1ViewBase()	16	static
+../TouchGFX/generated/gui_generated/include/gui_generated/screen1_screen/Screen1ViewBase.hpp:18:13:virtual Screen1ViewBase::~Screen1ViewBase()	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/Color.hpp:54:22:static touchgfx::colortype touchgfx::Color::getColorFrom24BitRGB(uint8_t, uint8_t, uint8_t)	24	static
-../TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:8:1:Screen1ViewBase::Screen1ViewBase()	40	static
-../TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:23:6:virtual void Screen1ViewBase::setupScreen()	16	static
+../TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:9:1:Screen1ViewBase::Screen1ViewBase()	72	static
+../TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:64:6:virtual void Screen1ViewBase::setupScreen()	16	static
 ../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:50:5:touchgfx::View<T>::View() [with T = Screen1Presenter]	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/TextArea.hpp:46:7:touchgfx::TextArea::~TextArea()	16	static
 ../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/TextArea.hpp:46:7:virtual touchgfx::TextArea::~TextArea()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/ToggleButton.hpp:34:7:touchgfx::ToggleButton::~ToggleButton()	16	static
+../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/ToggleButton.hpp:34:7:virtual touchgfx::ToggleButton::~ToggleButton()	16	static

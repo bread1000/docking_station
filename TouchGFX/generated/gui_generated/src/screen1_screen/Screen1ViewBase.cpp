@@ -4,20 +4,61 @@
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <touchgfx/Color.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
+#include "BitmapDatabase.hpp"
 
 Screen1ViewBase::Screen1ViewBase()
 {
 
     box1.setPosition(0, 0, 240, 320);
-    box1.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 255));
+    box1.setColor(touchgfx::Color::getColorFrom24BitRGB(255, 255, 255));
 
-    textArea1.setXY(42, 148);
-    textArea1.setColor(touchgfx::Color::getColorFrom24BitRGB(255, 255, 255));
+    textArea1.setXY(24, 0);
+    textArea1.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea1.setLinespacing(0);
     textArea1.setTypedText(touchgfx::TypedText(T_SINGLEUSEID1));
 
+    textArea2.setXY(18, 58);
+    textArea2.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2.setLinespacing(0);
+    textArea2.setTypedText(touchgfx::TypedText(T_SINGLEUSEID5));
+
+    textArea2_2.setXY(103, 115);
+    textArea2_2.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2_2.setLinespacing(0);
+    textArea2_2.setTypedText(touchgfx::TypedText(T_SINGLEUSEID7));
+
+    textArea2_3.setXY(40, 231);
+    textArea2_3.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2_3.setLinespacing(0);
+    textArea2_3.setTypedText(touchgfx::TypedText(T_SINGLEUSEID10));
+
+    textArea2_4.setXY(52, 83);
+    textArea2_4.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2_4.setLinespacing(0);
+    textArea2_4.setTypedText(touchgfx::TypedText(T_SINGLEUSEID11));
+
+    toggleButton1.setXY(52, 244);
+    toggleButton1.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_OFF_ID), touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_ON_ID));
+
+    textArea2_5.setXY(18, 195);
+    textArea2_5.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2_5.setLinespacing(0);
+    textArea2_5.setTypedText(touchgfx::TypedText(T_SINGLEUSEID12));
+
+    textArea2_5_1.setXY(161, 195);
+    textArea2_5_1.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textArea2_5_1.setLinespacing(0);
+    textArea2_5_1.setTypedText(touchgfx::TypedText(T_SINGLEUSEID13));
+
     add(box1);
     add(textArea1);
+    add(textArea2);
+    add(textArea2_2);
+    add(textArea2_3);
+    add(textArea2_4);
+    add(toggleButton1);
+    add(textArea2_5);
+    add(textArea2_5_1);
 }
 
 void Screen1ViewBase::setupScreen()

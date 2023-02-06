@@ -46,15 +46,22 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+
 CRC_HandleTypeDef hcrc;
+
 DMA2D_HandleTypeDef hdma2d;
+
 LTDC_HandleTypeDef hltdc;
+
 SPI_HandleTypeDef hspi5;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
@@ -89,7 +96,6 @@ static void MX_TIM3_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
-
 /* USER CODE BEGIN PFP */
 //Funkcje do przesyłu danych przez SPI5
 void writeReg(uint8_t);
@@ -105,6 +111,10 @@ void writeData(uint8_t);
 static char line_buffer[LINE_MAX_LENGTH + 1];
 static uint32_t line_length;
 static uint8_t TX_BUFFER[BUFFER_LEN] = {0};
+//static uint8_t RX_BUFFER[BUFFER_LEN] = {0};
+static uint32_t read;
+uint32_t battery_adc = 0;
+static float battery_voltage = 0;
 
 //Funkcja dodająca kolejne przychodzące znaki jednej linii do bufora
 void line_append(uint8_t value)
@@ -112,10 +122,28 @@ void line_append(uint8_t value)
 	//odebrano znak końca linii
 	if (value == '\r' || value == '\n')
 	{
+		int a = 0;
+		int b = 0;
+		int c = 0;
+		int d = 0;
 		if (line_length > 0)
 		{
 			line_buffer[line_length] = '\0';		//jeśli bufor nie jest pusty - dodaj 0 na końcu linii
 			printf("Otrzymano: %s\n", line_buffer);
+
+			a = atoi((char*)&line_buffer[0]);
+			b = atoi((char*)&line_buffer[1]);
+			c = atoi((char*)&line_buffer[2]);
+			d = atoi((char*)&line_buffer[3]);
+			printf("Otrzymano: %d\n", a);
+			printf("Otrzymano: %d\n", b);
+			printf("Otrzymano: %d\n", c);
+			printf("Otrzymano: %d\n", d);
+
+			battery_adc = a;
+			battery_voltage = 3.3f * battery_adc / (4096.0f-1);
+			printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
+
 			line_length = 0;						//zbieranie danych od nowa
 		}
 	//odebrano znak inny niż końca linii
@@ -145,10 +173,14 @@ int __io_putchar(int ch)
 //Przerwanie od receivera uart------------------------------------
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	//uint8_t value;
-	//if (HAL_UART_Receive(&huart2, &received, 1, 0) == HAL_OK)
-	//line_append(received);
-	//atoi((char*)&received)
+	//battery_adc = atoi((char*)&RX_BUFFER[0]);
+	//battery_voltage = 3.3f * battery_adc / (4096.0f-1);
+	//printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
+	//if (HAL_UART_Receive(&huart2, &read, 1, 0) == HAL_OK)
+	//	line_append(read);
+
+	//wlaczenie nasluchiwania na kanale UART
+	//HAL_UART_Receive_IT(&huart2, line_buffer, BUFFER_LEN);
 }
 /* USER CODE END 0 */
 
@@ -192,7 +224,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TouchGFX_Init();
-
   /* USER CODE BEGIN 2 */
   //Zegar obsługujący czujnik odległości HC-SR04
   HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_1);
@@ -201,11 +232,11 @@ int main(void)
 
   //Zegar generujący sygnał 36kHz dla diód IR
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t read;
   uint8_t distance = 0;
   uint8_t prev_distance = 0;
   bool ROBOT = false;

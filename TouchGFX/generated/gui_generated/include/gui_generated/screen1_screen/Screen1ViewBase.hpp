@@ -9,6 +9,7 @@
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/widgets/ToggleButton.hpp>
 
 class Screen1ViewBase : public touchgfx::View<Screen1Presenter>
 {
@@ -27,6 +28,13 @@ protected:
      */
     touchgfx::Box box1;
     touchgfx::TextArea textArea1;
+    touchgfx::TextArea textArea2;
+    touchgfx::TextArea textArea2_2;
+    touchgfx::TextArea textArea2_3;
+    touchgfx::TextArea textArea2_4;
+    touchgfx::ToggleButton toggleButton1;
+    touchgfx::TextArea textArea2_5;
+    touchgfx::TextArea textArea2_5_1;
 
 private:
 
