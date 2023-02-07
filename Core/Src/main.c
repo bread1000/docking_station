@@ -115,6 +115,7 @@ static uint8_t TX_BUFFER[BUFFER_LEN] = {0};
 static uint32_t read;
 uint32_t battery_adc = 0;
 static float battery_voltage = 0;
+static uint8_t battery_percentage = 0;
 
 //Funkcja dodająca kolejne przychodzące znaki jednej linii do bufora
 void line_append(uint8_t value)
@@ -123,26 +124,17 @@ void line_append(uint8_t value)
 	if (value == '\r' || value == '\n')
 	{
 		int a = 0;
-		int b = 0;
-		int c = 0;
-		int d = 0;
 		if (line_length > 0)
 		{
 			line_buffer[line_length] = '\0';		//jeśli bufor nie jest pusty - dodaj 0 na końcu linii
-			printf("Otrzymano: %s\n", line_buffer);
+			//printf("Otrzymano: %s\n", line_buffer);
 
-			a = atoi((char*)&line_buffer[0]);
-			b = atoi((char*)&line_buffer[1]);
-			c = atoi((char*)&line_buffer[2]);
-			d = atoi((char*)&line_buffer[3]);
-			printf("Otrzymano: %d\n", a);
-			printf("Otrzymano: %d\n", b);
-			printf("Otrzymano: %d\n", c);
-			printf("Otrzymano: %d\n", d);
-
-			battery_adc = a;
+			battery_adc = atoi((char*)&line_buffer[0]);
+			printf("%lu\n", battery_adc);
 			battery_voltage = 3.3f * battery_adc / (4096.0f-1);
-			printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
+			battery_percentage = 100*battery_adc/4096;
+			printf("%d\n", battery_percentage);
+			//printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
 
 			line_length = 0;						//zbieranie danych od nowa
 		}

@@ -17,22 +17,25 @@ Screen1ViewBase::Screen1ViewBase()
     textArea1.setLinespacing(0);
     textArea1.setTypedText(touchgfx::TypedText(T_SINGLEUSEID1));
 
-    textArea2.setXY(18, 58);
+    textArea2.setXY(7, 58);
     textArea2.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2.setLinespacing(0);
     textArea2.setTypedText(touchgfx::TypedText(T_SINGLEUSEID5));
 
-    textArea2_2.setXY(103, 115);
-    textArea2_2.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
-    textArea2_2.setLinespacing(0);
-    textArea2_2.setTypedText(touchgfx::TypedText(T_SINGLEUSEID7));
+    textAreaAD.setXY(103, 115);
+    textAreaAD.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
+    textAreaAD.setLinespacing(0);
+    textAreaADBuffer[0] = 0;
+    textAreaAD.setWildcard(textAreaADBuffer);
+    textAreaAD.resizeToCurrentText();
+    textAreaAD.setTypedText(touchgfx::TypedText(T_SINGLEUSEID7));
 
     textArea2_3.setXY(40, 231);
     textArea2_3.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2_3.setLinespacing(0);
     textArea2_3.setTypedText(touchgfx::TypedText(T_SINGLEUSEID10));
 
-    textArea2_4.setXY(52, 83);
+    textArea2_4.setXY(84, 83);
     textArea2_4.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2_4.setLinespacing(0);
     textArea2_4.setTypedText(touchgfx::TypedText(T_SINGLEUSEID11));
@@ -53,7 +56,7 @@ Screen1ViewBase::Screen1ViewBase()
     add(box1);
     add(textArea1);
     add(textArea2);
-    add(textArea2_2);
+    add(textAreaAD);
     add(textArea2_3);
     add(textArea2_4);
     add(toggleButton1);
