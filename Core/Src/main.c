@@ -51,6 +51,8 @@ CRC_HandleTypeDef hcrc;
 
 DMA2D_HandleTypeDef hdma2d;
 
+I2C_HandleTypeDef hi2c3;
+
 LTDC_HandleTypeDef hltdc;
 
 SPI_HandleTypeDef hspi5;
@@ -96,26 +98,36 @@ static void MX_TIM3_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_I2C3_Init(void);
 /* USER CODE BEGIN PFP */
-//Funkcje do przesyłu danych przez SPI5
-void writeReg(uint8_t);
-void writeData(uint8_t);
+
+//Link function for LCD peripheral
+void 			writeReg(uint8_t);
+void 			writeData(uint8_t);
+uint32_t 		LCD_ReadData(uint16_t RegValue, uint8_t ReadSize);
+//SPIx bus function
+static void     SPI5_Write(uint16_t Value);
+static uint32_t SPI5_Read(uint8_t ReadSize);
+//I2C function
+static uint8_t I2C3_ReadData(uint8_t Addr, uint8_t Reg);
+static void    I2C3_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value);
+static uint8_t I2C3_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
+//IOExpander IO functions
+void           IOE_Delay(uint32_t Delay);
+void           IOE_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
+uint8_t        IOE_Read(uint8_t Addr, uint8_t Reg);
+uint16_t       IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/*-----UART1-USB-------*/
-/*-----UART2-MODUL-BLUETOOTH-----*/
-
 static char line_buffer[LINE_MAX_LENGTH + 1];
 static uint32_t line_length;
-static uint8_t TX_BUFFER[BUFFER_LEN] = {0};
-//static uint8_t RX_BUFFER[BUFFER_LEN] = {0};
-static uint32_t read;
+static uint8_t send;
+static uint8_t read;
 uint32_t battery_adc = 0;
 static float battery_voltage = 0;
-static uint8_t battery_percentage = 0;
 
 //Funkcja dodająca kolejne przychodzące znaki jednej linii do bufora
 void line_append(uint8_t value)
@@ -123,7 +135,6 @@ void line_append(uint8_t value)
 	//odebrano znak końca linii
 	if (value == '\r' || value == '\n')
 	{
-		int a = 0;
 		if (line_length > 0)
 		{
 			line_buffer[line_length] = '\0';		//jeśli bufor nie jest pusty - dodaj 0 na końcu linii
@@ -132,9 +143,6 @@ void line_append(uint8_t value)
 			battery_adc = atoi((char*)&line_buffer[0]);
 			printf("%lu\n", battery_adc);
 			battery_voltage = 3.3f * battery_adc / (4096.0f-1);
-			battery_percentage = 100*battery_adc/4096;
-			printf("%d\n", battery_percentage);
-			//printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
 
 			line_length = 0;						//zbieranie danych od nowa
 		}
@@ -162,18 +170,6 @@ int __io_putchar(int ch)
     return 1;
 }
 
-//Przerwanie od receivera uart------------------------------------
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	//battery_adc = atoi((char*)&RX_BUFFER[0]);
-	//battery_voltage = 3.3f * battery_adc / (4096.0f-1);
-	//printf("ADC = %lu (%.2f V)\n", battery_adc, battery_voltage);
-	//if (HAL_UART_Receive(&huart2, &read, 1, 0) == HAL_OK)
-	//	line_append(read);
-
-	//wlaczenie nasluchiwania na kanale UART
-	//HAL_UART_Receive_IT(&huart2, line_buffer, BUFFER_LEN);
-}
 /* USER CODE END 0 */
 
 /**
@@ -215,15 +211,15 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_I2C3_Init();
   MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
-  //Zegar obsługujący czujnik odległości HC-SR04
-  HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_1);
+
+  HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_1);	//timer 3 - obsługuje prawy czujnik odległości HC-SR04
   HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
-  //Zegar generujący sygnał 36kHz dla diód IR
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);	//tim 2 - zegar generujący sygnał 36kHz dla diód IR
 
   /* USER CODE END 2 */
 
@@ -231,9 +227,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uint8_t distance = 0;
   uint8_t prev_distance = 0;
-  bool ROBOT = false;
+  bool ROBOT_hcsr04 = false;
+  bool ROBOT_docked = false;
   uint8_t value = 0;
-  float voltage = 0;
   uint8_t start = 0;
   uint8_t stop = 0;
   uint8_t uart1;
@@ -244,49 +240,63 @@ int main(void)
 	  if (HAL_UART_Receive(&huart2, &read, 1, 0) == HAL_OK)
 		  line_append(read);
 
-	  /*---------------Pomiar napięcia na stykach-ADC------------PA2*/
+	  /*---------------Pomiar napięcia na stykach-ADC---------------*/
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-
 	  value = HAL_ADC_GetValue(&hadc1);
-	  voltage = 3.3f * value / 4096.0f;
 
-	  //printf("ADC = %lu (%.3f V)\n", value, voltage);
-	  //HAL_Delay(250);
+	  //jeśli ADC wykryło napięcie - robot został zadokowany
+	  if (ROBOT_docked == false && value > 10)
+	  {
+		  ROBOT_docked = true;
+
+		  //wysłanie informacji do robota - połączenie styków
+		  send = '3';
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
+	  }
+	  else if (ROBOT_docked == true && value < 10)
+	  {
+		  ROBOT_docked = false;
+
+		  //wysłanie informacji do robota - rozłączenie styków
+		  send = '4';
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
+	  }
 
 	  /*----------------Czujnik odległości-HC-SR04------------------*/
-	  start = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1);
-	  stop = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_2);
-	  distance = (stop - start) / 58;
-	  //printf("STACJA: %u\n", distance);
+	  start = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1);	//wystąpienie zbocza narastającego sygnału 'echo'
+	  stop = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_2);	//wystąpienie zbocza opadającego sygnału 'echo'
+	  distance = (stop - start) / 58.0f;						//czas wystąpienia sygnału 'echo'
 
+	  //zapis dystansu do nowej zmiennej, która jest nadpisywana jedynie, gdy zmierzona odległość się zmieni
 	  if (prev_distance != distance)
 	  	  	  prev_distance = distance;
 
-	  if (ROBOT == false && prev_distance < 5)
+	  //czujnik odległości wykrył robota w odległości < 5 cm
+	  if (ROBOT_hcsr04 == false && prev_distance < 5)
 	  {
-		  ROBOT = true;
+		  ROBOT_hcsr04 = true;
 
-		  //wysłanie informacji do robota, że czujnik wykrył go przed stykami
-		  TX_BUFFER[0] = '1';
-		  HAL_UART_Transmit(&huart2, TX_BUFFER, sizeof(TX_BUFFER), HAL_MAX_DELAY);
+		  //wysłanie informacji do robota - czujnik wykrył go przed stykami
+		  send = '1';
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
 	  }
-	  else if (ROBOT == true && prev_distance > 4)
+	  //czujnik odległości wykrył robota w odległości > 4 cm
+	  else if (ROBOT_hcsr04 == true && prev_distance > 4)
 	  {
-		  ROBOT = false;
+		  ROBOT_hcsr04 = false;
 
-		  //wysłanie informacji do robota, że czujnik przestał wykrywać go przed stykami
-		  TX_BUFFER[0] = '2';
-		  HAL_UART_Transmit(&huart2, TX_BUFFER, sizeof(TX_BUFFER), HAL_MAX_DELAY);
+		  //wysłanie informacji do robota - czujnik przestał wykrywać go przed stykami
+		  send = '2';
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
 	  }
 
 	  /*-------Sterowanie robota z poziomu komputera-USB-UART-------*/
 	  if (HAL_UART_Receive(&huart1, &uart1, 1, 0) == HAL_OK)
 	  {
 		  line_append(uart1);
-
-		  TX_BUFFER[0] = uart1;
-		  HAL_UART_Transmit(&huart2, TX_BUFFER, 1, HAL_MAX_DELAY);
+		  send = uart1;
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
 	  }
     /* USER CODE END WHILE */
 
@@ -463,6 +473,52 @@ static void MX_DMA2D_Init(void)
   /* USER CODE BEGIN DMA2D_Init 2 */
 
   /* USER CODE END DMA2D_Init 2 */
+
+}
+
+/**
+  * @brief I2C3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C3_Init(void)
+{
+
+  /* USER CODE BEGIN I2C3_Init 0 */
+
+  /* USER CODE END I2C3_Init 0 */
+
+  /* USER CODE BEGIN I2C3_Init 1 */
+
+  /* USER CODE END I2C3_Init 1 */
+  hi2c3.Instance = I2C3;
+  hi2c3.Init.ClockSpeed = 100000;
+  hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c3.Init.OwnAddress1 = 0;
+  hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c3.Init.OwnAddress2 = 0;
+  hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c3, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c3, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C3_Init 2 */
+
+  /* USER CODE END I2C3_Init 2 */
 
 }
 
@@ -1069,6 +1125,111 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+  * @brief  IOE Writes single data operation.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address
+  * @param  Value: Data to be written
+  */
+void IOE_Write(uint8_t Addr, uint8_t Reg, uint8_t Value)
+{
+  I2C3_WriteData(Addr, Reg, Value);
+}
+
+/**
+  * @brief  IOE Reads single data.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address
+  * @retval The read data
+  */
+uint8_t IOE_Read(uint8_t Addr, uint8_t Reg)
+{
+  return I2C3_ReadData(Addr, Reg);
+}
+
+/**
+  * @brief  IOE Reads multiple data.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address
+  * @param  pBuffer: pointer to data buffer
+  * @param  Length: length of the data
+  * @retval 0 if no problems to read multiple data
+  */
+uint16_t IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length)
+{
+ return I2C3_ReadBuffer(Addr, Reg, pBuffer, Length);
+}
+
+/**
+  * @brief  IOE Writes single data operation.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address
+  * @param  Value: Data to be written
+  */
+static void I2C3_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value)
+{
+  HAL_I2C_Mem_Write(&hi2c3, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, &Value, 1, 0x3000);
+}
+
+/**
+  * @brief  Reads a register of the device through BUS.
+  * @param  Addr: Device address on BUS Bus.
+  * @param  Reg: The target register address to write
+  * @retval Data read at register address
+  */
+static uint8_t I2C3_ReadData(uint8_t Addr, uint8_t Reg)
+{
+  uint8_t value = 0;
+  HAL_I2C_Mem_Read(&hi2c3, Addr, Reg, I2C_MEMADD_SIZE_8BIT, &value, 1, 0x3000);
+
+  return value;
+}
+
+/**
+  * @brief  Reads multiple data on the BUS.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address
+  * @param  pBuffer: pointer to read data buffer
+  * @param  Length: length of the data
+  * @retval 0 if no problems to read multiple data
+  */
+static uint8_t I2C3_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length)
+{
+  HAL_StatusTypeDef status = HAL_OK;
+
+  status = HAL_I2C_Mem_Read(&hi2c3, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, pBuffer, Length, 0x3000);
+
+  /* Check the communication status */
+  if(status == HAL_OK)
+    return 0;
+  else
+    return 1;
+}
+
+/**
+  * @brief  Reads 4 bytes from device.
+  * @param  ReadSize: Number of bytes to read (max 4 bytes)
+  * @retval Value read on the SPI
+  */
+static uint32_t SPI5_Read(uint8_t ReadSize)
+{
+  uint32_t readvalue;
+  HAL_SPI_Receive(&hspi5, (uint8_t*) &readvalue, ReadSize, 0x1000);
+
+  return readvalue;
+}
+
+/**
+  * @brief  Writes a byte to device.
+  * @param  Value: value to be written
+  */
+static void SPI5_Write(uint16_t Value)
+{
+  HAL_SPI_Transmit(&hspi5, (uint8_t*) &Value, 1, 0x1000);
+}
+
+
+
 void writeReg(uint8_t reg)
 {
 	HAL_GPIO_WritePin(DCX_GPIO_Port, DCX_Pin, GPIO_PIN_RESET);
@@ -1083,6 +1244,26 @@ void writeData(uint8_t data)
 	HAL_GPIO_WritePin(CSX_GPIO_Port, CSX_Pin, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(&hspi5, &data, 1, 10);
 	HAL_GPIO_WritePin(CSX_GPIO_Port, CSX_Pin, GPIO_PIN_SET);
+}
+
+//Reads register value.
+uint32_t LCD_ReadData(uint16_t RegValue, uint8_t ReadSize)
+{
+  uint32_t readvalue = 0;
+  /* Select: Chip Select low */
+  HAL_GPIO_WritePin(CSX_GPIO_Port, CSX_Pin, GPIO_PIN_RESET);
+  /* Reset WRX to send command */
+  HAL_GPIO_WritePin(DCX_GPIO_Port, DCX_Pin, GPIO_PIN_RESET);
+
+  SPI5_Write(RegValue);
+  readvalue = SPI5_Read(ReadSize);
+
+  /* Set WRX to send data */
+  HAL_GPIO_WritePin(DCX_GPIO_Port, DCX_Pin, GPIO_PIN_SET);
+  /* Deselect: Chip Select high */
+  HAL_GPIO_WritePin(CSX_GPIO_Port, CSX_Pin, GPIO_PIN_SET);
+
+  return readvalue;
 }
 /* USER CODE END 4 */
 

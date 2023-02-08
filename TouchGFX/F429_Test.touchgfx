@@ -57,7 +57,7 @@
             "AutoSize": true,
             "LineSpacing": 0,
             "Name": "textArea2",
-            "X": 7,
+            "X": 11,
             "Y": 58,
             "Width": 218,
             "Height": 25,
@@ -80,13 +80,14 @@
             "AutoSize": true,
             "LineSpacing": 0,
             "Wildcard1": {
+              "TextId": "SingleUseId14",
               "UseBuffer": true,
-              "BufferSize": 10
+              "BufferSize": 8
             },
             "Name": "textAreaAD",
-            "X": 103,
-            "Y": 115,
-            "Width": 0,
+            "X": 89,
+            "Y": 114,
+            "Width": 54,
             "Height": 25,
             "Type": "TextArea",
             "Visible": true,
@@ -130,9 +131,9 @@
             "AutoSize": true,
             "LineSpacing": 0,
             "Name": "textArea2_4",
-            "X": 84,
+            "X": 79,
             "Y": 83,
-            "Width": 65,
+            "Width": 74,
             "Height": 25,
             "Type": "TextArea",
             "Visible": true,
@@ -171,9 +172,9 @@
             "AutoSize": true,
             "LineSpacing": 0,
             "Name": "textArea2_5",
-            "X": 18,
+            "X": 24,
             "Y": 195,
-            "Width": 110,
+            "Width": 118,
             "Height": 25,
             "Type": "TextArea",
             "Visible": true,
@@ -194,7 +195,7 @@
             "AutoSize": true,
             "LineSpacing": 0,
             "Name": "textArea2_5_1",
-            "X": 161,
+            "X": 178,
             "Y": 195,
             "Width": 38,
             "Height": 25,
@@ -241,9 +242,13 @@
       {
         "TextEntryId": "SingleUseId13",
         "IsResource": false
+      },
+      {
+        "TextEntryId": "SingleUseId14",
+        "IsResource": false
       }
     ],
-    "Name": "F429_Test",
+    "Name": "F429_Test2",
     "Resolution": {
       "Width": 240,
       "Height": 320
@@ -279,7 +284,7 @@
     },
     "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
     "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
-    "PostGenerateTargetCommand": "touchgfx update_project --project-file=../F429_Test.ioc --platform=m4",
+    "PostGenerateTargetCommand": "touchgfx update_project --project-file=../F429_Test2.ioc --platform=m4",
     "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
     "RunSimulatorCommand": "build\\bin\\simulator.exe",
     "LandscapeSkinX": 0,

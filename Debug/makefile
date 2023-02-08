@@ -61,34 +61,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := F429_Test
+BUILD_ARTIFACT_NAME := F429_Test2
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-F429_Test.elf \
+F429_Test2.elf \
 
 MAP_FILES += \
-F429_Test.map \
+F429_Test2.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-F429_Test.list \
+F429_Test2.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: F429_Test.elf secondary-outputs
+main-build: F429_Test2.elf secondary-outputs
 
 # Tool invocations
-F429_Test.elf F429_Test.map: $(OBJS) $(USER_OBJS) C:\Users\weron\STM32CubeIDE\kostel\F429_Test\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "F429_Test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\weron\STM32CubeIDE\kostel\F429_Test\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="F429_Test.map" -Wl,--gc-sections -static -L"C:\Users\weron\STM32CubeIDE\kostel\F429_Test\Middlewares\ST\touchgfx\lib\core\cortex_m4f\gcc" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+F429_Test2.elf F429_Test2.map: $(OBJS) $(USER_OBJS) C:\Users\weron\STM32CubeIDE\kostel\F429_Test2\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "F429_Test2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\weron\STM32CubeIDE\kostel\F429_Test2\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="F429_Test2.map" -Wl,--gc-sections -static -L"C:\Users\weron\STM32CubeIDE\kostel\F429_Test2\Middlewares\ST\touchgfx\lib\core\cortex_m4f\gcc" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -97,14 +97,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-F429_Test.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "F429_Test.list"
+F429_Test2.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "F429_Test2.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) F429_Test.elf F429_Test.list F429_Test.map default.size.stdout
+	-$(RM) F429_Test2.elf F429_Test2.list F429_Test2.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

@@ -17,15 +17,15 @@ Screen1ViewBase::Screen1ViewBase()
     textArea1.setLinespacing(0);
     textArea1.setTypedText(touchgfx::TypedText(T_SINGLEUSEID1));
 
-    textArea2.setXY(7, 58);
+    textArea2.setXY(11, 58);
     textArea2.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2.setLinespacing(0);
     textArea2.setTypedText(touchgfx::TypedText(T_SINGLEUSEID5));
 
-    textAreaAD.setXY(103, 115);
+    textAreaAD.setXY(89, 114);
     textAreaAD.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textAreaAD.setLinespacing(0);
-    textAreaADBuffer[0] = 0;
+    Unicode::snprintf(textAreaADBuffer, TEXTAREAAD_SIZE, "%s", touchgfx::TypedText(T_SINGLEUSEID14).getText());
     textAreaAD.setWildcard(textAreaADBuffer);
     textAreaAD.resizeToCurrentText();
     textAreaAD.setTypedText(touchgfx::TypedText(T_SINGLEUSEID7));
@@ -35,7 +35,7 @@ Screen1ViewBase::Screen1ViewBase()
     textArea2_3.setLinespacing(0);
     textArea2_3.setTypedText(touchgfx::TypedText(T_SINGLEUSEID10));
 
-    textArea2_4.setXY(84, 83);
+    textArea2_4.setXY(79, 83);
     textArea2_4.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2_4.setLinespacing(0);
     textArea2_4.setTypedText(touchgfx::TypedText(T_SINGLEUSEID11));
@@ -43,12 +43,12 @@ Screen1ViewBase::Screen1ViewBase()
     toggleButton1.setXY(52, 244);
     toggleButton1.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_OFF_ID), touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_ON_ID));
 
-    textArea2_5.setXY(18, 195);
+    textArea2_5.setXY(24, 195);
     textArea2_5.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2_5.setLinespacing(0);
     textArea2_5.setTypedText(touchgfx::TypedText(T_SINGLEUSEID12));
 
-    textArea2_5_1.setXY(161, 195);
+    textArea2_5_1.setXY(178, 195);
     textArea2_5_1.setColor(touchgfx::Color::getColorFrom24BitRGB(0, 0, 0));
     textArea2_5_1.setLinespacing(0);
     textArea2_5_1.setTypedText(touchgfx::TypedText(T_SINGLEUSEID13));

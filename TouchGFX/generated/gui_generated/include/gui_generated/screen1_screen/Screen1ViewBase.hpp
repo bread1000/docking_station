@@ -40,7 +40,7 @@ protected:
     /*
      * Wildcard Buffers
      */
-    static const uint16_t TEXTAREAAD_SIZE = 10;
+    static const uint16_t TEXTAREAAD_SIZE = 8;
     touchgfx::Unicode::UnicodeChar textAreaADBuffer[TEXTAREAAD_SIZE];
 
 private:
