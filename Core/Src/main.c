@@ -122,6 +122,7 @@ uint16_t       IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uin
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+static bool DOCKING = false;
 static char line_buffer[LINE_MAX_LENGTH + 1];
 static uint32_t line_length;
 static uint8_t send;
@@ -137,14 +138,12 @@ void line_append(uint8_t value)
 	{
 		if (line_length > 0)
 		{
-			line_buffer[line_length] = '\0';		//jeśli bufor nie jest pusty - dodaj 0 na końcu linii
-			//printf("Otrzymano: %s\n", line_buffer);
+			line_buffer[line_length] = '\0';	//jeśli bufor nie jest pusty - dodaj 0 na końcu linii
 
-			battery_adc = atoi((char*)&line_buffer[0]);
-			printf("%lu\n", battery_adc);
-			battery_voltage = 3.3f * battery_adc / (4096.0f-1);
+			battery_adc = atoi((char*)&line_buffer[0]);			//zamiana typu 'char' na 'int'
+			battery_voltage = 3.3f * battery_adc / (4096.0f-1);	//zamiana wartości cyfrowej na napięcie
 
-			line_length = 0;						//zbieranie danych od nowa
+			line_length = 0;					//zbieranie danych od nowa
 		}
 	//odebrano znak inny niż końca linii
 	}else{
@@ -219,8 +218,6 @@ int main(void)
   HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);	//tim 2 - zegar generujący sygnał 36kHz dla diód IR
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -249,6 +246,9 @@ int main(void)
 	  if (ROBOT_docked == false && value > 10)
 	  {
 		  ROBOT_docked = true;
+		  DOCKING = false;
+
+		  HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);	//tim 2 - sygnał PWM 36kHz diod IR
 
 		  //wysłanie informacji do robota - połączenie styków
 		  send = '3';
@@ -260,6 +260,18 @@ int main(void)
 
 		  //wysłanie informacji do robota - rozłączenie styków
 		  send = '4';
+		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
+	  }
+
+	  /*-Wywołanie procesu dokowania, jeśli napięcie na baterii spadło do 10 V-*/
+	  if (DOCKING == false && ROBOT_docked == false && battery_voltage <= 10)
+	  {
+		  DOCKING = true;
+
+		  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);	//tim 2 - sygnał PWM 36kHz diod IR
+
+		  //wysłanie informacji do robota - rozpoczęcie dokowania
+		  send = '5';
 		  HAL_UART_Transmit(&huart2, &send, 1, HAL_MAX_DELAY);
 	  }
 
